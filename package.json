@@ -2,8 +2,8 @@
     "name": "ng-translator",
     "displayName": "Generate Translation",
     "description": "A visual studio code extension for you to generate the translations without leaving the current file.",
-    "homepage": "https://github.com/thiagocordeirooo/generate-translation-vscode",
-    "author": "Thiago Cordeiro <thiagocordeirooo@gmail.com>",
+    "homepage": "https://github.com/regexer-github/generate-translation-vscode",
+    "author": "Michiel Van den Bossche",
     "icon": "assets/logo-i18n.png",
     "galleryBanner": {
         "color": "#08165f",
@@ -14,10 +14,10 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/thiagocordeirooo/generate-translation-vscode.git"
+        "url": "https://github.com/regexer-github/generate-translation-vscode.git"
     },
     "bugs": {
-        "url": "https://github.com/thiagocordeirooo/generate-translation-vscode/issues"
+        "url": "https://github.com/regexer-github/generate-translation-vscode/issues"
     },
     "engines": {
         "vscode": "^1.0.0"

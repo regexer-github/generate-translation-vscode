@@ -6,11 +6,11 @@ A visual studio code extension for you to generate the translations without leav
 
 ### Text-is-value: false
 
-![Usage](./assets/ng-translator.gif)
+![Usage](/assets/ng-translator.gif)
 
 ### Text-is-value: true
 
-![Usage](./assets/ng-translator-text-is-value.gif)
+![Usage](/assets/ng-translator-text-is-value.gif)
 
 ## Finding hardcoded strings in your templates
 
