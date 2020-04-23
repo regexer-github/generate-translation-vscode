@@ -1,1 +1,8 @@
-{}
+{
+    "test-lib": {
+        "template": {
+            "helloTitle": "Hello title",
+            "welcomeUserName": "Welcome {{userName}}"
+        }
+    }
+}

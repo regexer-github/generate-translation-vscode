@@ -12,7 +12,7 @@ export interface GenerateTranslationConfiguration {
 
 export class ConfigurationUtil {
     static getConfiguration(): GenerateTranslationConfiguration {
-        const section = workspace.getConfiguration('generate-translation');
+        const section = workspace.getConfiguration('ng-translator');
         return {
             selectedTextIsValue: section.get('text-is-value'),
             path: `${workspace.rootPath}${section.get('path')}`,
