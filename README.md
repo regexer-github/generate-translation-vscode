@@ -1,6 +1,10 @@
-# Generate Translation :alien:
+# Angular Translator :alien:
 
 A visual studio code extension for you to generate the translations without leaving the current file.
+
+---
+
+Credits to Thiago (https://github.com/thiagocordeirooo/generate-translation-vscode) for the original extension
 
 ## Usage
 

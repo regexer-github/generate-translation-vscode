@@ -1,6 +1,6 @@
 {
     "name": "ng-translator",
-    "displayName": "Generate Translation",
+    "displayName": "Angular Translator",
     "description": "A visual studio code extension for you to generate the translations without leaving the current file.",
     "homepage": "https://github.com/regexer-github/generate-translation-vscode",
     "author": "Michiel Van den Bossche",
@@ -85,11 +85,11 @@
         "commands": [
             {
                 "command": "generateTranslation.fromSelectedText",
-                "title": "Generate Translation: From selected text"
+                "title": "Angular Translator: From selected text"
             },
             {
                 "command": "generateTranslation.generate",
-                "title": "Generate Translation: Generate"
+                "title": "Angular Translator: From new key"
             }
         ]
     },
