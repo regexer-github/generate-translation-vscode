@@ -2,7 +2,7 @@
     "name": "ng-translator",
     "displayName": "Angular Translator",
     "description": "A visual studio code extension for you to generate the translations without leaving the current file.",
-    "homepage": "https://github.com/regexer-github/generate-translation-vscode",
+    "homepage": "https://github.com/regexer-github/ng-translator",
     "author": "Michiel Van den Bossche",
     "icon": "assets/logo-i18n.png",
     "galleryBanner": {
@@ -14,10 +14,10 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/regexer-github/generate-translation-vscode.git"
+        "url": "https://github.com/regexer-github/ng-translator.git"
     },
     "bugs": {
-        "url": "https://github.com/regexer-github/generate-translation-vscode/issues"
+        "url": "https://github.com/regexer-github/ng-translator/issues"
     },
     "engines": {
         "vscode": "^1.0.0"
