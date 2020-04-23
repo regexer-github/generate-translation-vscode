@@ -34,8 +34,8 @@
         "ngx-translate"
     ],
     "activationEvents": [
-        "onCommand:generateTranslation.generate",
-        "onCommand:generateTranslation.fromSelectedText"
+        "onCommand:ngTranslator.fromNewKey",
+        "onCommand:ngTranslator.fromSelectedText"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -84,11 +84,11 @@
         },
         "commands": [
             {
-                "command": "generateTranslation.fromSelectedText",
+                "command": "ngTranslator.fromSelectedText",
                 "title": "Angular Translator: From selected text"
             },
             {
-                "command": "generateTranslation.generate",
+                "command": "ngTranslator.fromNewKey",
                 "title": "Angular Translator: From new key"
             }
         ]

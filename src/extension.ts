@@ -2,17 +2,17 @@ import { ExtensionContext, commands, window } from 'vscode';
 import { GenerateTranslation } from './lib';
 
 export const activate = (context: ExtensionContext) => {
-    registerCommand(context, 'generateTranslation.generate', generate);
-    registerCommand(context, 'generateTranslation.fromSelectedText', fromSelectedText);
+    registerCommand(context, 'ngTranslator.fromNewKey', fromNewKey);
+    registerCommand(context, 'ngTranslator.fromSelectedText', fromSelectedText);
 };
 
-const generate = async () => {
+const fromNewKey = async () => {
     const key = await window.showInputBox({
         prompt: `Which key do you want to use?`,
     });
 
     if (key) {
-        GenerateTranslation.generate(key);
+        GenerateTranslation.fromKey(key);
     }
 };
 

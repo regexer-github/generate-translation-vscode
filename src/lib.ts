@@ -10,7 +10,7 @@ let dotProp = require('dot-prop-immutable');
 export class GenerateTranslation {
     private static _config = ConfigurationUtil.getConfiguration();
 
-    public static generate(key: string) {
+    public static fromKey(key: string) {
         GenerateTranslation.fromSelectedText(key);
     }
 
