@@ -43,7 +43,9 @@ export class FileUtil {
             });
             return result;
         } catch {
-            throw new Error('No translation file was found. Check the path configured in the extension.');
+            throw new Error(
+                `No translation files were found at path ${basePath}. Check the path configured in the extension.`
+            );
         }
     };
 
