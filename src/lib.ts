@@ -137,8 +137,8 @@ export class GenerateTranslation {
 
         if (editor && replaceForExtensions.indexOf(extname.replace('.', '')) > -1 && templateSnippetToReplace) {
             const translatePipeExpression = templateSnippetToReplace
-                .replace('i18n', translationKey)
-                .replace('params', translationSuffix);
+                .replace('translate', 'translate' + translationSuffix)
+                .replace('i18n', translationKey);
 
             editor.edit((editBuilder) => {
                 editBuilder.replace(editor.selection, translatePipeExpression);
