@@ -1,5 +1,5 @@
 import { window } from 'vscode';
-import { ConfigurationUtil } from './utils/configuration.util';
+import { ConfigurationUtil, GenerateTranslationConfiguration } from './utils/configuration.util';
 import { File, FileUtil } from './utils/file.util';
 import { KeyValue, StringUtil } from './utils/string.util';
 import fs = require('fs');
@@ -8,13 +8,17 @@ import path = require('path');
 let dotProp = require('dot-prop-immutable');
 
 export class GenerateTranslation {
-    private static _config = ConfigurationUtil.getConfiguration();
+    private static _config: GenerateTranslationConfiguration;
 
     public static fromKey(key: string) {
+        // Reload config with every command
+        this._config = ConfigurationUtil.getConfiguration();
         GenerateTranslation.fromSelectedText(key);
     }
 
     public static async fromSelectedText(textSelection: string) {
+        // Reload config with every command
+        this._config = ConfigurationUtil.getConfiguration();
         try {
             let translationParams: KeyValue[] = [];
             let translationKey: string;
