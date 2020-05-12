@@ -35,7 +35,9 @@
     ],
     "activationEvents": [
         "onCommand:ngTranslator.fromNewKey",
-        "onCommand:ngTranslator.fromSelectedText"
+        "onCommand:ngTranslator.fromSelectedText",
+        "onCommand:ngTranslator.fromCurrentFile"
+        
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -90,6 +92,10 @@
             {
                 "command": "ngTranslator.fromNewKey",
                 "title": "Angular Translator: From new key"
+            },
+            {
+                "command": "ngTranslator.fromCurrentFile",
+                "title": "Angular Translator: From current file"
             }
         ]
     },

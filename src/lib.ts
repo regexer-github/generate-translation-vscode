@@ -1,4 +1,4 @@
-import { window } from 'vscode';
+import { window, workspace, Range, Position } from 'vscode';
 import { ConfigurationUtil, GenerateTranslationConfiguration } from './utils/configuration.util';
 import { File, FileUtil } from './utils/file.util';
 import { KeyValue, StringUtil } from './utils/string.util';
@@ -10,17 +10,42 @@ let dotProp = require('dot-prop-immutable');
 export class GenerateTranslation {
     private static _config: GenerateTranslationConfiguration;
 
+    public static async fromCurrentFile() {
+        GenerateTranslation.reloadConfig();
+
+        const editor = window.activeTextEditor;
+        const text = editor.document.getText();
+
+        const textInTagsRegex = new RegExp(/(?<=>\s*)\w+[\w\s{}\'\.]*(?=<)/g);
+        await GenerateTranslation.generateTranslationsForRegex(text, textInTagsRegex);
+        const textTitleRegex = new RegExp(/(?<=title=")\w+[\w\s{}\'\.]*(?=")/g);
+        await GenerateTranslation.generateTranslationsForRegex(text, textTitleRegex);
+    }
+
+    private static async generateTranslationsForRegex(text: string, textInTagsRegex: RegExp) {
+        const matches = text.match(textInTagsRegex);
+        if (matches) {
+            for (let index = 0; index < matches.length; index++) {
+                const m = matches[index].trim();
+                const options: ReplaceOptions = {
+                    fromSelection: false,
+                    originalText: m,
+                };
+                await this.fromSelectedText(m, options);
+            }
+        }
+    }
+
     public static fromKey(key: string) {
-        // Reload config with every command
-        this._config = ConfigurationUtil.getConfiguration();
+        GenerateTranslation.reloadConfig();
         GenerateTranslation.fromSelectedText(key);
     }
 
-    public static async fromSelectedText(textSelection: string) {
-        // Reload config with every command
-        this._config = ConfigurationUtil.getConfiguration();
+    public static async fromSelectedText(textSelection: string, options: ReplaceOptions = { fromSelection: true }) {
+        GenerateTranslation.reloadConfig();
         try {
             let translationParams: KeyValue[] = [];
+            console.log('for text', textSelection);
             let translationKey: string;
             let translationValue = '';
 
@@ -41,36 +66,46 @@ export class GenerateTranslation {
             for (let i = 0; i < translationFiles.length; i++) {
                 const file = translationFiles[i];
 
-                let translationFileContent = JSON.parse(fs.readFileSync(file.path, 'utf-8'));
+                const content = fs.readFileSync(file.path, 'utf-8');
+                let translationFileContent = JSON.parse(content);
 
                 const existingKey = dotProp.get(translationFileContent, translationKey);
                 if (existingKey) {
                     window.showErrorMessage(`${translationKey} already exists in the file ${file.name}.`);
-                    continue;
+                } else {
+                    if (!this._config.selectedTextIsValue) {
+                        translationValue = await window.showInputBox({
+                            prompt: `What is value in ${file.name} ?`,
+                            placeHolder: translationKey,
+                        });
+                    }
+                    if (!translationValue) {
+                        continue;
+                    }
                 }
-
-                if (!this._config.selectedTextIsValue) {
-                    translationValue = await window.showInputBox({
-                        prompt: `What is value in ${file.name} ?`,
-                        placeHolder: translationKey,
-                    });
-                }
-                if (!translationValue) {
-                    continue;
-                }
-
                 translationParams = StringUtil.getTranslationParams(translationValue);
                 translationParams.forEach((p) => {
                     translationValue = translationValue.replace(p.value, p.key);
                 });
+                if (!existingKey) {
+                    await GenerateTranslation.updateResourceFile(
+                        file,
+                        translationFileContent,
+                        translationKey,
+                        translationValue
+                    );
+                }
 
-                GenerateTranslation.updateResourceFile(file, translationFileContent, translationKey, translationValue);
-
-                GenerateTranslation.replaceSelectionInEditor(translationKey, translationParams);
+                await GenerateTranslation.replaceSelectionInEditor(translationKey, translationParams, options);
             }
         } catch (error) {
             window.showErrorMessage(error.message);
         }
+    }
+
+    private static reloadConfig() {
+        // Reload config with every command
+        this._config = ConfigurationUtil.getConfiguration();
     }
 
     private static async updateResourceFile(
@@ -114,7 +149,12 @@ export class GenerateTranslation {
 
         window.showInformationMessage(`${translationKey} added in the file ${file.name}.`);
     }
-    private static replaceSelectionInEditor(translationKey: string, paramList: { key: string; value: string }[] = []) {
+
+    private static async replaceSelectionInEditor(
+        translationKey: string,
+        paramList: { key: string; value: string }[] = [],
+        options: ReplaceOptions
+    ) {
         const editor = window.activeTextEditor;
 
         const replaceForExtensions = <Array<string>>this._config.replaceForExtensions;
@@ -140,9 +180,24 @@ export class GenerateTranslation {
                 .replace('translate', 'translate' + translationSuffix)
                 .replace('i18n', translationKey);
 
-            editor.edit((editBuilder) => {
-                editBuilder.replace(editor.selection, translatePipeExpression);
+            await editor.edit((editBuilder) => {
+                if (options.fromSelection) {
+                    editBuilder.replace(editor.selection, translatePipeExpression);
+                } else {
+                    const text = options.originalText as string;
+                    const positionFrom = editor.document.positionAt(editor.document.getText().indexOf(text));
+                    const positionTo = new Position(positionFrom.line, positionFrom.character + text.length);
+                    const range = new Range(positionFrom, positionTo);
+
+                    console.log('replace in editor', positionFrom, positionTo, editor.document.getText());
+                    editBuilder.replace(range, translatePipeExpression);
+                }
             });
+            await editor.document.save();
         }
     }
+}
+interface ReplaceOptions {
+    fromSelection: boolean;
+    originalText?: string;
 }

@@ -17,11 +17,7 @@ export class FileUtil {
                 translateObject = JsonUtil.sortObject(translateObject);
             }
 
-            fs.writeFile(file.path, JSON.stringify(translateObject, null, tabSize), (err: any) => {
-                if (err) {
-                    throw err;
-                }
-            });
+          fs.writeFileSync(file.path, JSON.stringify(translateObject, null, tabSize));
         } catch {
             throw new Error(`Error saving file ${file.name}.`);
         }
