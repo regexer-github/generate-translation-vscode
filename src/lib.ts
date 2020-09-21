@@ -67,7 +67,11 @@ export class GenerateTranslation {
                 const file = translationFiles[i];
 
                 const content = fs.readFileSync(file.path, 'utf-8');
-                let translationFileContent = JSON.parse(content);
+
+        let translationFileContent = {};
+        if(!!content){ 
+            translationFileContent = JSON.parse(content);
+        }
 
                 const existingKey = dotProp.get(translationFileContent, translationKey);
                 if (existingKey) {
