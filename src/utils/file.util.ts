@@ -4,7 +4,14 @@ import { window } from 'vscode';
 import { JsonUtil } from './json.util';
 export class File {
     public get name() {
-        return this.path.replace(`${this.directory}/`, '');
+        // Remove the path
+        const fileName = this.path.replace(`${this.directory}`, '');
+        // Remove the extension
+        return fileName.split('.')[0];
+    }
+
+    public isInLanguage(language: string) {
+        return this.name === language;
     }
     constructor(public readonly path: string, private readonly directory: string) {}
 }
@@ -17,7 +24,7 @@ export class FileUtil {
                 translateObject = JsonUtil.sortObject(translateObject);
             }
 
-          fs.writeFileSync(file.path, JSON.stringify(translateObject, null, tabSize));
+            fs.writeFileSync(file.path, JSON.stringify(translateObject, null, tabSize));
         } catch {
             throw new Error(`Error saving file ${file.name}.`);
         }
