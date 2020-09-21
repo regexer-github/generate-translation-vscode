@@ -5,22 +5,22 @@ export interface GenerateTranslationConfiguration {
     path: string;
     includeLibraryName: boolean;
     includeFileNameName: boolean;
-    replaceForExtensions: string[];
-    templateSnippetToReplace: string;
     sort: boolean;
+    defaultLanguage: string;
+    leaveNonDefaultLanguagesBlank: boolean;
 }
 
 export class ConfigurationUtil {
     static getConfiguration(): GenerateTranslationConfiguration {
         const section = workspace.getConfiguration('ng-translator');
         return {
-            selectedTextIsValue: section.get('text-is-value'),
+            selectedTextIsValue: section.get('textIsValue'),
+            includeLibraryName: section.get('includeLibraryName'),
+            includeFileNameName: section.get('includeFileName'),
             path: `${workspace.rootPath}${section.get('path')}`,
-            includeLibraryName: section.get('include-library-name'),
-            includeFileNameName: section.get('include-file-name'),
-            replaceForExtensions: section.get('replaceForExtensions'),
-            templateSnippetToReplace: section.get('templateSnippetToReplace'),
             sort: section.get('sort'),
+            defaultLanguage: section.get('defaultLanguage'),
+            leaveNonDefaultLanguagesBlank: section.get('leaveNonDefaultLanguagesBlank'),
         } as GenerateTranslationConfiguration;
     }
 }

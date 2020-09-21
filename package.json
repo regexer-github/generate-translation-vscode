@@ -37,13 +37,12 @@
         "onCommand:ngTranslator.fromNewKey",
         "onCommand:ngTranslator.fromSelectedText",
         "onCommand:ngTranslator.fromCurrentFile"
-        
     ],
     "main": "./out/extension.js",
     "contributes": {
         "configuration": {
             "type": "object",
-            "title": "ng-translator configuration",
+            "title": "ng-translator",
             "properties": {
                 "ng-translator.path": {
                     "type": "string",
@@ -55,32 +54,30 @@
                     "default": true,
                     "description": "Sort object after inserting translation."
                 },
-                "ng-translator.replaceForExtensions": {
-                    "type": "array",
-                    "default": [
-                        "html"
-                    ],
-                    "description": "Define extentions (html, js, ts, etc.) for which templateSnippetToReplace will be used."
-                },
-                "ng-translator.templateSnippetToReplace": {
-                    "type": "string",
-                    "default": "{{ 'i18n' | translate }}",
-                    "description": "Template snippet to replace the selected text after generating a translation string. \n The string i18n will be replaced by the chosen key."
-                },
-                "ng-translator.include-file-name": {
+                "ng-translator.textIsValue": {
                     "type": "boolean",
-                    "default": true,
-                    "description": "Include the name of the file in the directory structure of the translation. e.g. my-component.my-translation"
+                    "default": false,
+                    "description": "Indicates wether the selected text is the translated value. In this case the key will be auto generated."
                 },
-                "ng-translator.include-library-name": {
+                "ng-translator.includeLibraryName": {
                     "type": "boolean",
                     "default": true,
                     "description": "Include the name of the library in the directory structure of the translation. e.g. my-library.my-translation"
                 },
-                "ng-translator.text-is-value": {
+                "ng-translator.includeFileName": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Include the name of the file in the directory structure of the translation. e.g. my-component.my-translation"
+                },
+                "ng-translator.defaultLanguage": {
+                    "type": "string",
+                    "default": "en",
+                    "description": "The file in which the selected text will be copied. You will be prompted for all other languages"
+                },
+                "ng-translator.leaveNonDefaultLanguagesBlank": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Indicates wether the selected text is the translated value. In this case the key will be auto generated."
+                    "description": "When true, you will not be prompted for a translation except for the default language."
                 }
             }
         },

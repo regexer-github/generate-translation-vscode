@@ -41,7 +41,12 @@ export class GenerateTranslation {
         GenerateTranslation.fromSelectedText(key);
     }
 
-    public static async fromSelectedText(textSelection: string, options: ReplaceOptions = { fromSelection: true }) {
+    public static async fromSelectedText(
+        textSelection: string,
+        options: ReplaceOptions = {
+            fromSelection: true,
+        }
+    ) {
         GenerateTranslation.reloadConfig();
         try {
             let translationParams: KeyValue[] = [];
@@ -65,46 +70,56 @@ export class GenerateTranslation {
 
             for (let i = 0; i < translationFiles.length; i++) {
                 const file = translationFiles[i];
-
-                const content = fs.readFileSync(file.path, 'utf-8');
+                await this.addTranslationToFile(file, options, translationKey, translationValue);
+            }
+                await GenerateTranslation.replaceSelectionInEditor(translationKey, translationParams, options);
+        } catch (error) {
+            window.showErrorMessage(error.message);
+        }
+    }
+    private static async addTranslationToFile(
+        file: File,
+        options: ReplaceOptions,
+        translationKey: string,
+        translationValue: string
+    ): Promise<void> {
+        const translation = new Translation(translationKey, translationValue);
+        const content = fs.readFileSync(file.path, 'utf-8');
 
         let translationFileContent = {};
         if(!!content){ 
             translationFileContent = JSON.parse(content);
         }
 
-                const existingKey = dotProp.get(translationFileContent, translationKey);
-                if (existingKey) {
-                    window.showErrorMessage(`${translationKey} already exists in the file ${file.name}.`);
+        const existingKey = dotProp.get(translationFileContent, translationKey);
+        if (existingKey) {
+            window.showErrorMessage(`${translationKey} already exists in the file ${file.name}.`);
+        } else {            
+            const isDefaultLanguage = file.isInLanguage(this._config.defaultLanguage);
+            if(!isDefaultLanguage){
+                if(this._config.leaveNonDefaultLanguagesBlank){
+                    // If only the default value requires a translation, leave it blank
+                    translationValue ='';
                 } else {
-                    if (!this._config.selectedTextIsValue) {
-                        translationValue = await window.showInputBox({
-                            prompt: `What is value in ${file.name} ?`,
-                            placeHolder: translationKey,
-                        });
-                    }
-                    if (!translationValue) {
-                        continue;
-                    }
+                    // When not in the default language and translations, cannot be blank, request translation from the user
+                    translationValue = await GenerateTranslation.getTranslationValue(file, translationKey);
                 }
-                translationParams = StringUtil.getTranslationParams(translationValue);
-                translationParams.forEach((p) => {
-                    translationValue = translationValue.replace(p.value, p.key);
-                });
-                if (!existingKey) {
-                    await GenerateTranslation.updateResourceFile(
-                        file,
-                        translationFileContent,
-                        translationKey,
-                        translationValue
-                    );
-                }
-
-                await GenerateTranslation.replaceSelectionInEditor(translationKey, translationParams, options);
-            }
-        } catch (error) {
-            window.showErrorMessage(error.message);
+            }            
+            translation.value = translationValue;
         }
+        translation.addParams(StringUtil.getTranslationParams(translationValue));
+
+        if (!existingKey) {
+            await GenerateTranslation.updateResourceFile(file, translationFileContent, translation);
+        }
+        return;
+    }
+
+    private static async getTranslationValue(file: File, translationKey: string): Promise<string> {
+        return await window.showInputBox({
+            prompt: `What is value in ${file.name} ?`,
+            placeHolder: translationKey,
+        });
     }
 
     private static reloadConfig() {
@@ -113,23 +128,11 @@ export class GenerateTranslation {
     }
 
     private static async updateResourceFile(
-        file: File,
-        translationFileContent: any,
-        translationKey: string,
-        translationValue: string
-    ) {
-        // Split the translation key.
-        // We expect the last value in the key to be the value that needs translating
-        // The prefixes, separated by '.', are are the directory to that translation
-        // e.g. translationKey = 'library.component.title'
-
-        const translationDirectory = translationKey.split('.');
-        // Remove the last part 'title'
-        // translationDirectory = ['library', 'component']
-        translationDirectory.pop();
-
+        file: File, 
+        translationFileContent: any, 
+        translation: Translation) {
         // Check if the path exists in the translation file
-        const directoryValue = dotProp.get(translationFileContent, translationDirectory.join('.'));
+        const directoryValue = dotProp.get(translationFileContent, translation.directory);
 
         // If a translation already exists at directory path, show message and continue;
         // e.g. { library: { component: 'translated value'} }
@@ -137,7 +140,7 @@ export class GenerateTranslation {
 
         if (translationInDirectory) {
             window.showErrorMessage(
-                `${translationDirectory.join('.')} directly contains a translation: ${directoryValue}.`
+                `${translation.directory} directly contains a translation: ${directoryValue}.`
             );
             return;
         }
@@ -145,13 +148,13 @@ export class GenerateTranslation {
         // Update the content
         translationFileContent = dotProp.set(
             translationFileContent,
-            StringUtil.normalizeKey(translationKey),
-            translationValue
+            StringUtil.normalizeKey(translation.key),
+            translation.value
         );
         // Write the content back to the file system
         await FileUtil.updateFile(file, translationFileContent, this._config.sort);
 
-        window.showInformationMessage(`${translationKey} added in the file ${file.name}.`);
+        window.showInformationMessage(`${translation.key} added in the file ${file.name}.`);
     }
 
     private static async replaceSelectionInEditor(
@@ -160,9 +163,6 @@ export class GenerateTranslation {
         options: ReplaceOptions
     ) {
         const editor = window.activeTextEditor;
-
-        const replaceForExtensions = <Array<string>>this._config.replaceForExtensions;
-        const templateSnippetToReplace = <string>this._config.templateSnippetToReplace;
 
         let translationSuffix = '';
         if (!!paramList && paramList.length > 0) {
@@ -177,10 +177,8 @@ export class GenerateTranslation {
             translationSuffix = `: { ${paramsString} }`;
         }
 
-        const extname = path.extname(editor.document.fileName);
-
-        if (editor && replaceForExtensions.indexOf(extname.replace('.', '')) > -1 && templateSnippetToReplace) {
-            const translatePipeExpression = templateSnippetToReplace
+        if (editor) {
+            const translatePipeExpression = "{{ 'i18n' | translate }}"
                 .replace('translate', 'translate' + translationSuffix)
                 .replace('i18n', translationKey);
 
@@ -204,4 +202,28 @@ export class GenerateTranslation {
 interface ReplaceOptions {
     fromSelection: boolean;
     originalText?: string;
+}
+class Translation {
+    public params: KeyValue[];
+    public get directory(): string {
+        // Split the translation key.
+        // We expect the last value in the key to be the value that needs translating
+        // The prefixes, separated by '.', are are the directory to that translation
+        // e.g. translationKey = 'library.component.title'
+        const translationDirectory = this.key.split('.');
+        
+        // Remove the last part 'title'
+        // translationDirectory = ['library', 'component']
+        translationDirectory.pop();
+        return translationDirectory.join('.');
+    }
+    constructor(public key: string, public value: string) {
+        this.params = [];
+    }
+    addParams(params: KeyValue[]) {
+        this.params = params;
+        this.params.forEach((p) => {
+            this.value = this.value.replace(p.value, p.key);
+        });
+    }
 }
