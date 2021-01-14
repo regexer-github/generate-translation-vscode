@@ -16,6 +16,10 @@ Credits to Thiago (https://github.com/thiagocordeirooo/generate-translation-vsco
 
 ![Usage](/assets/ng-translator-text-is-value.gif)
 
+### Translating an entire HTML page
+
+![Usage](/assets/ng-translator-file.gif)
+
 ## Finding hardcoded strings in your templates
 
 Here are some handy regular expressions you can use for this. As far as I know, vscode api currently does not support search, so you'll have to do this manually.
